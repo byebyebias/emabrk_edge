@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { motion } from 'motion/react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { 
   Wallet, 
   ShoppingBag, 
@@ -42,18 +42,11 @@ const categories: BudgetCategory[] = [
     description: 'Groceries, eating out'
   },
   {
-    id: 'phone',
-    name: 'Phone Bill',
-    icon: <Phone className="w-5 h-5" />,
-    targetAmount: 45,
-    description: 'Monthly plan'
-  },
-  {
-    id: 'internet',
-    name: 'Internet',
+    id: 'phone-internet',
+    name: 'Phone & Internet',
     icon: <Wifi className="w-5 h-5" />,
-    targetAmount: 75,
-    description: 'Home internet'
+    targetAmount: 120,
+    description: 'Mobile plan, home internet'
   },
   {
     id: 'transportation',
@@ -70,18 +63,11 @@ const categories: BudgetCategory[] = [
     description: 'Movies, streaming'
   },
   {
-    id: 'personal',
-    name: 'Personal Care',
+    id: 'personal-clothing',
+    name: 'Personal & Clothing',
     icon: <Heart className="w-5 h-5" />,
-    targetAmount: 50,
-    description: 'Hygiene, haircuts'
-  },
-  {
-    id: 'clothing',
-    name: 'Clothing',
-    icon: <ShoppingBag className="w-5 h-5" />,
-    targetAmount: 65,
-    description: 'Clothes, shoes'
+    targetAmount: 115,
+    description: 'Hygiene, clothes, shoes'
   },
   {
     id: 'savings',
@@ -92,7 +78,7 @@ const categories: BudgetCategory[] = [
   }
 ];
 
-const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#6366f1', '#14b8a6'];
+const COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
 
 const TOTAL_BUDGET = 1000;
 
@@ -144,7 +130,14 @@ export function BudgetAllocationGame({ onComplete }: BudgetAllocationGameProps) 
     const totalAllocated = getTotalAllocated();
     const budgetBonus = totalAllocated <= TOTAL_BUDGET ? 25 : 0;
     
-    onComplete(finalScore + budgetBonus);
+    // Store final score to be passed on complete
+    setFinalScore(finalScore + budgetBonus);
+  };
+
+  const [finalScore, setFinalScore] = useState(0);
+
+  const handleFinish = () => {
+    onComplete(finalScore);
   };
 
   const totalAllocated = getTotalAllocated();
@@ -347,59 +340,31 @@ export function BudgetAllocationGame({ onComplete }: BudgetAllocationGameProps) 
           {/* Comparison Visualization */}
           <Card className="bg-white border-purple-200">
             <CardHeader>
-              <CardTitle className="text-lg">Your Budget vs Average Canadian Budget</CardTitle>
+              <CardTitle className="text-lg">Your Budget vs National Average</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* Your Budget */}
-                <div>
-                  <p className="text-center font-medium text-purple-900 mb-2">Your Budget</p>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={getPieChartData()}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={60}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                      >
-                        {getPieChartData().map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => `$${value}`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Average Canadian Budget */}
-                <div>
-                  <p className="text-center font-medium text-green-700 mb-2">Average Canadian</p>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={categories.map((cat, idx) => ({
-                          name: cat.name,
-                          value: cat.targetAmount,
-                          color: COLORS[idx]
-                        }))}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={60}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-                      >
-                        {categories.map((_, index) => (
-                          <Cell key={`cell-avg-${index}`} fill={COLORS[index]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => `$${value}`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={categories.map(cat => ({
+                      name: cat.name.split(' ')[0], // Shorten name for axis
+                      You: parseFloat(allocations[cat.id] || '0'),
+                      Average: cat.targetAmount
+                    }))}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
+                    <Tooltip 
+                      formatter={(value: number) => [`$${value}`, '']}
+                      contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                    />
+                    <Legend />
+                    <Bar dataKey="You" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Average" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
@@ -422,9 +387,16 @@ export function BudgetAllocationGame({ onComplete }: BudgetAllocationGameProps) 
                         <span className="font-medium text-sm">{category.name}</span>
                       </div>
                       <div className="flex items-center gap-4 text-sm">
-                        <span className="text-purple-900">You: ${allocated.toFixed(0)}</span>
-                        <span className="text-gray-400">|</span>
-                        <span className="text-green-700">Avg: ${category.targetAmount}</span>
+                        <div className="text-right">
+                          <div className="text-purple-900 font-medium">You: ${allocated.toFixed(0)}</div>
+                          <div className="text-green-700 text-xs">Avg: ${category.targetAmount}</div>
+                        </div>
+                        <div className={`text-xs font-medium px-2 py-1 rounded ${
+                          result.difference === 0 ? 'bg-gray-100 text-gray-600' :
+                          result.difference > 0 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+                        }`}>
+                          {result.difference > 0 ? '+' : ''}${result.difference.toFixed(0)}
+                        </div>
                         <Badge className={getAccuracyColor(result.accuracy)} variant="outline">
                           {Math.round(result.accuracy)}%
                         </Badge>
@@ -453,28 +425,20 @@ export function BudgetAllocationGame({ onComplete }: BudgetAllocationGameProps) 
                     <strong>$375</strong>
                   </div>
                   <div className="flex justify-between p-2 bg-white/60 rounded">
-                    <span>🚗 Transportation:</span>
+                    <span>📱 Phone & Internet:</span>
                     <strong>$120</strong>
                   </div>
                   <div className="flex justify-between p-2 bg-white/60 rounded">
-                    <span>📱 Internet:</span>
-                    <strong>$75</strong>
+                    <span>🚗 Transportation:</span>
+                    <strong>$120</strong>
                   </div>
                   <div className="flex justify-between p-2 bg-white/60 rounded">
                     <span>🎬 Entertainment:</span>
                     <strong>$70</strong>
                   </div>
                   <div className="flex justify-between p-2 bg-white/60 rounded">
-                    <span>👔 Clothing:</span>
-                    <strong>$65</strong>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white/60 rounded">
-                    <span>💅 Personal Care:</span>
-                    <strong>$50</strong>
-                  </div>
-                  <div className="flex justify-between p-2 bg-white/60 rounded">
-                    <span>📞 Phone Bill:</span>
-                    <strong>$45</strong>
+                    <span>👔 Personal & Clothing:</span>
+                    <strong>$115</strong>
                   </div>
                   <div className="flex justify-between p-2 bg-white/60 rounded">
                     <span>💰 Savings:</span>
@@ -487,6 +451,14 @@ export function BudgetAllocationGame({ onComplete }: BudgetAllocationGameProps) 
           </Card>
         </div>
       )}
+
+      {/* Finish Button */}
+      <Button
+        onClick={handleFinish}
+        className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 shadow-lg py-6 text-lg"
+      >
+        Complete Lesson & Collect Points
+      </Button>
 
       {/* Tips Card */}
       {!hasSubmitted && (

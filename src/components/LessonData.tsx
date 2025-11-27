@@ -8,7 +8,7 @@ export const budgetingLessons = [
     content: `Think you know how much everyday items cost? Let's find out!
 
 **Your Challenge:**
-Guess the price of 6 common household items and see how close you are to real Canadian prices.`,
+Guess the price of 4 common household items and see how close you are to real Canadian prices.`,
     isGameLesson: true,
     gameType: 'price' as const,
     totalPoints: 120
@@ -672,7 +672,7 @@ export const respLessons = [
     id: 'resp-1',
     title: 'RESP Basics: Your Education Fund',
     description: 'Learn how RESPs work and why they\'re amazing',
-    videoUrl: '/videos/resp_intro.mp4',
+    videoUrl: './public/videos/resp_explainer.mp4',
     content: `An RESP (Registered Education Savings Plan) is Canada's gift to students—a special savings account designed specifically for post-secondary education.
 
 **What Makes RESPs Special?**

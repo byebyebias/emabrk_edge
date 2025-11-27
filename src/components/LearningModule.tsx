@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { Trophy, Star, Coins, BookOpen, Target, CreditCard, Flame, Zap, Play, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 
-interface Module {
+export interface Module {
   id: string;
   title: string;
   description: string;
@@ -25,48 +25,23 @@ interface LearningModuleProps {
   userPoints: number;
   onPointsEarned: (points: number) => void;
   onModuleComplete: () => void;
+  modules: Module[];
+  onUpdateModules: (modules: Module[]) => void;
+  streak: number;
+  onUpdateStreak: (streak: number) => void;
 }
 
-export function LearningModule({ userPoints, onPointsEarned, onModuleComplete }: LearningModuleProps) {
-  const [modules, setModules] = useState<Module[]>([
-    {
-      id: '1',
-      title: 'RESP Mastery 🇨🇦',
-      description: 'Master Canadian education savings and get FREE government money',
-      icon: <GraduationCap className="w-6 h-6" />,
-      lessons: 3,
-      completedLessons: 0,
-      points: 595,
-      difficulty: 'Beginner',
-      moduleKey: 'resp'
-    },
-    {
-      id: '2',
-      title: 'Budgeting and Saving',
-      description: 'Learn how to budget wisely and save money for your goals',
-      icon: <Target className="w-6 h-6" />,
-      lessons: 3,
-      completedLessons: 0,
-      points: 370,
-      difficulty: 'Beginner',
-      moduleKey: 'budgetingAndSaving'
-    },
-    {
-      id: '3',
-      title: 'Borrowing and Investing',
-      description: 'Smart borrowing with OSAP, investment growth, and real-life scenarios',
-      icon: <Star className="w-6 h-6" />,
-      lessons: 3,
-      completedLessons: 0,
-      points: 535,
-      difficulty: 'Intermediate',
-      moduleKey: 'borrowingAndInvesting'
-    }
-  ]);
-
+export function LearningModule({ 
+  userPoints, 
+  onPointsEarned, 
+  onModuleComplete,
+  modules,
+  onUpdateModules,
+  streak,
+  onUpdateStreak
+}: LearningModuleProps) {
   const [currentLesson, setCurrentLesson] = useState<any>(null);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [streak, setStreak] = useState(3);
 
   const handleStartLesson = (module: Module) => {
     const moduleLessons = allLessons[module.moduleKey as keyof typeof allLessons];
@@ -83,8 +58,9 @@ export function LearningModule({ userPoints, onPointsEarned, onModuleComplete }:
     onPointsEarned(points);
     
     if (perfect) {
-      setStreak(prev => prev + 1);
-      toast.success(`🔥 Perfect score! ${streak + 1} lesson streak!`, {
+      const newStreak = streak + 1;
+      onUpdateStreak(newStreak);
+      toast.success(`🔥 Perfect score! ${newStreak + 1} lesson streak!`, {
         description: `Earned ${points} points with streak bonus!`,
       });
     } else {
@@ -93,7 +69,7 @@ export function LearningModule({ userPoints, onPointsEarned, onModuleComplete }:
       });
     }
 
-    setModules(prev => prev.map(module => {
+    const updatedModules = modules.map(module => {
       if (module.id === currentLesson.moduleId) {
         const newCompleted = module.completedLessons + 1;
         return {
@@ -102,16 +78,11 @@ export function LearningModule({ userPoints, onPointsEarned, onModuleComplete }:
         };
       }
       return module;
-    }));
+    });
+
+    onUpdateModules(updatedModules);
 
     setCurrentLesson(null);
-    
-    const updatedModules = modules.map(module => {
-      if (module.id === currentLesson.moduleId) {
-        return { ...module, completedLessons: module.completedLessons + 1 };
-      }
-      return module;
-    });
     
     const totalCompletedLessons = updatedModules.reduce((acc, curr) => acc + curr.completedLessons, 0);
     if (totalCompletedLessons >= 5) {

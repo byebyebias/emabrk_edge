@@ -28,39 +28,27 @@ interface GuessPriceGameProps {
 const items: Item[] = [
   {
     id: '1',
-    name: 'Shampoo (400ml)',
-    actualPrice: 7,
-    image: '🧴'
-  },
-  {
-    id: '2',
-    name: 'Olive Oil (500ml)',
-    actualPrice: 11,
-    image: '🫒'
-  },
-  {
-    id: '3',
     name: 'Milk (4L)',
     actualPrice: 7,
     image: '🥛'
   },
   {
+    id: '2',
+    name: 'Graphing Calculator',
+    actualPrice: 120,
+    image: '🖩'
+  },
+  {
+    id: '3',
+    name: 'Printer Ink (Cartridge)',
+    actualPrice: 40,
+    image: '🖨️'
+  },
+  {
     id: '4',
-    name: 'Ground Coffee (300g)',
-    actualPrice: 13,
-    image: '☕'
-  },
-  {
-    id: '5',
-    name: 'Chicken Breast (1kg)',
-    actualPrice: 15,
-    image: '🍗'
-  },
-  {
-    id: '6',
-    name: 'Laundry Detergent (4.5L)',
-    actualPrice: 14,
-    image: '🧴'
+    name: 'Annual Textbook Costs',
+    actualPrice: 1500,
+    image: '📚'
   }
 ];
 
